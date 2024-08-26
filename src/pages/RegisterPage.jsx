@@ -66,7 +66,7 @@ const LoginPage = () => {
         console.log(token)
         toast.success("Login berhasil");
         localStorage.setItem("nilai token", token)
-        navigate("/mainmenu")
+        navigate("/transaksi")
       }
       
     
