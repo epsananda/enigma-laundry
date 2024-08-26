@@ -47,7 +47,7 @@ const LoginPage = () => {
   const handleToggle = () => {
     setIsLogin(!isLogin);
     setSelected(isLogin ? "sign-up" : "login");
-    reset(); // reset form ketika toggle
+    reset();
   };
 
   const loginUser = async (data) => {

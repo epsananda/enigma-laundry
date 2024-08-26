@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
-import Layout from "../component/Layout";
-import { Button, Card, CardBody, CardHeader } from '@nextui-org/react';
-import { axiosInstance } from "../lib/axios";
+import React, { useEffect, useState } from 'react';
+import { Button, Card, CardBody, CardHeader, Input } from '@nextui-org/react';
+import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
-import { Divider } from "@nextui-org/react";
+import Layout from '../component/Layout';
+import axios from 'axios';
 
-const Produk = () => {
-    const [dataProducts, setDataProducts] = useState([]);
-    const [editProduct, setEditProduct] = useState(null);
+const ProdukPage = () => {
+    const [products, setProducts] = useState([]);
     const [newProduct, setNewProduct] = useState({ name: '', price: '', type: '' });
+    const [editingProductId, setEditingProductId] = useState(null);
+    const [editingProductData, setEditingProductData] = useState({ name: '', price: '', type: '' });
 
     const fetchListOfProduct = async () => {
         try {
@@ -21,7 +22,7 @@ const Produk = () => {
             const response = await axiosInstance.get('/products', { headers });
 
             if (response.status === 200) {
-                setDataProducts(response.data.data || []);
+                setProducts(response.data.data || []);
             } else {
                 toast.error('Failed to fetch products');
             }
@@ -43,7 +44,13 @@ const Produk = () => {
             }
 
             const headers = { Authorization: `Bearer ${token}` };
-            const response = await axiosInstance.post('/products', newProduct, { headers });
+            const productData = {
+                name: newProduct.name,
+                price: parseFloat(newProduct.price),
+                type: newProduct.type
+            };
+
+            const response = await axiosInstance.post('/products', productData, { headers });
 
             if (response.status === 201) {
                 toast.success('Product created successfully');
@@ -59,8 +66,6 @@ const Produk = () => {
     };
 
     const handleUpdateProduct = async () => {
-        if (!editProduct) return;
-
         try {
             const token = localStorage.getItem('nilai token');
             if (!token) {
@@ -68,12 +73,23 @@ const Produk = () => {
             }
 
             const headers = { Authorization: `Bearer ${token}` };
-            const response = await axiosInstance.put(`/products/${editProduct.id}`, editProduct, { headers });
+            const productData = {
+                id: editingProductId,
+                name: editingProductData.name,
+                price: parseFloat(editingProductData.price),
+                type: editingProductData.type
+            };
+
+            const response = await axiosInstance.put(`products/`, productData, { headers });
+            // const response = await axios.post("http://localhost:5173/api/v1/products", productData, { headers })
 
             if (response.status === 200) {
+                setProducts(prevProducts => prevProducts.map(product =>
+                    product.id === editingProductId ? { ...product, ...productData } : product
+                ));
+                setEditingProductId(null);
+                setEditingProductData({ name: '', price: '', type: '' });
                 toast.success('Product updated successfully');
-                setEditProduct(null);
-                fetchListOfProduct();
             } else {
                 toast.error('Failed to update product');
             }
@@ -86,114 +102,175 @@ const Produk = () => {
     const handleDeleteProduct = async (productId) => {
         try {
             const token = localStorage.getItem('nilai token');
-            if (!token) {
-                throw new Error('No token found');
-            }
+            const headers = {
+                Authorization: `Bearer ${token}`,
+            };
 
-            const headers = { Authorization: `Bearer ${token}` };
-            const response = await axiosInstance.delete(`/products/${productId}`, { headers });
+            await axiosInstance.delete(`products/${productId}`, { headers });
 
-            if (response.status === 200) {
-                toast.success('Product deleted successfully');
-                fetchListOfProduct();
-            } else {
-                toast.error('Failed to delete product');
-            }
+            setProducts(prevProduct => prevProduct.filter(product => product.id !== productId));
+            toast.success('Product deleted successfully');
         } catch (error) {
-            console.error('Error deleting product:', error);
-            toast.error(error.response?.data?.message || 'Failed to delete product');
+            if (error.response && error.response.status === 401) {
+                toast.error('Unauthorized. Please login again.');
+            } else {
+                toast.error(error.message);
+            }
         }
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditingProductData(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
     };
 
     return (
         <Layout>
             <div className="p-4">
-                <Card className="bg-[#f9f4ef]">
+                <Card className="bg-[#f9f4ef] mb-4">
                     <CardHeader>
-                        <h1 className="text-2xl font-bold mb-4">Daftar Produk</h1>
+                        <h3 className="text-2xl font-bold mb-4">Tambah Produk Baru</h3>
                     </CardHeader>
                     <CardBody>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Price</th>
-                                    <th>Type</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dataProducts.map((product) => (
-                                    <tr key={product.id}>
-                                        <td>{product.id}</td>
-                                        <td>{product.name}</td>
-                                        <td>{product.price}</td>
-                                        <td>{product.type}</td>
-                                        <td>{new Date(product.createdAt).toLocaleString()}</td>
-                                        <td>
-                                        <Divider />
-                                            <Button className="bg-[#8c7851] text-white mt-1" onClick={() => setEditProduct(product)}>Edit</Button>
-                                            <Button className="bg-[#8c7851] text-white mt-1" color="error" onClick={() => handleDeleteProduct(product.id)}>Delete</Button>
-                                        </td>
+                        <Input
+                            clearable
+                            underlined
+                            label="Nama Produk"
+                            placeholder="Masukkan Nama Produk"
+                            value={newProduct.name}
+                            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                            className="mb-4"
+                        />
+                        <Input
+                            clearable
+                            underlined
+                            label="Harga"
+                            placeholder="Masukkan Harga Produk"
+                            value={newProduct.price}
+                            onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                            className="mb-4"
+                        />
+                        <Input
+                            clearable
+                            underlined
+                            label="Jenis"
+                            placeholder="Masukkan Jenis Produk"
+                            value={newProduct.type}
+                            onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
+                            className="mb-4"
+                        />
+                        <Button onClick={handleCreateProduct} className="mt-4 bg-[#8c7851] text-white">
+                            Tambah Produk
+                        </Button>
+                    </CardBody>
+                </Card>
+
+                <Card className="bg-[#f9f4ef]">
+                    <CardHeader>
+                        <h3 className="text-2xl font-bold mb-4">Daftar Produk</h3>
+                    </CardHeader>
+                    <CardBody>
+                        {products.length > 0 ? (
+                            <table className="min-w-full bg-white border border-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th className="py-2 px-4 border-b">ID</th>
+                                        <th className="py-2 px-4 border-b">Nama</th>
+                                        <th className="py-2 px-4 border-b">Harga</th>
+                                        <th className="py-2 px-4 border-b">Jenis</th>
+                                        <th className="py-2 px-4 border-b">Created At</th>
+                                        <th className="py-2 px-4 border-b">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mt-4">
-                            <h2 className="text-xl font-semibold mb-2">Add New Product</h2>
-                            <input
-                                type="text"
-                                placeholder="Name"
-                                value={newProduct.name}
-                                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Price"
-                                value={newProduct.price}
-                                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Type"
-                                value={newProduct.type}
-                                onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
-                            />
-                            <Button className="bg-[#8c7851] text-white" onClick={handleCreateProduct}>Add Product</Button>
-                        </div>
-
-                        {editProduct && (
-                            <div className="mt-4">
-                                <h2 className="text-xl font-semibold mb-2">Edit Product</h2>
-                                <input
-                                    type="text"
-                                    placeholder="Name"
-                                    value={editProduct.name}
-                                    onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Price"
-                                    value={editProduct.price}
-                                    onChange={(e) => setEditProduct({ ...editProduct, price: e.target.value })}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Type"
-                                    value={editProduct.type}
-                                    onChange={(e) => setEditProduct({ ...editProduct, type: e.target.value })}
-                                />
-                                <Button className="bg-[#8c7851] text-white" onClick={handleUpdateProduct}>Update Product</Button>
-                            </div>
+                                </thead>
+                                <tbody>
+                                    {products.map((product) => (
+                                        <tr key={product.id}>
+                                            <td className="py-2 px-4 border-b">{product.id}</td>
+                                            <td className="py-2 px-4 border-b">
+                                                {editingProductId === product.id ? (
+                                                    <Input
+                                                        name="name"
+                                                        value={editingProductData.name}
+                                                        onChange={handleEditChange}
+                                                    />
+                                                ) : (
+                                                    product.name
+                                                )}
+                                            </td>
+                                            <td className="py-2 px-4 border-b">
+                                                {editingProductId === product.id ? (
+                                                    <Input
+                                                        name="price"
+                                                        value={editingProductData.price}
+                                                        onChange={handleEditChange} />
+                                                ) : (
+                                                    product.price
+                                                )}
+                                            </td>
+                                            <td className="py-2 px-4 border-b">
+                                                {editingProductId === product.id ? (
+                                                    <Input
+                                                        name="type"
+                                                        value={editingProductData.type}
+                                                        onChange={handleEditChange} />
+                                                ) : (
+                                                    product.type
+                                                )}
+                                            </td>
+                                            <td className="py-2 px-4 border-b">{new Date(product.createdAt).toLocaleString()}</td>
+                                            <td className="py-2 px-4 border-b flex space-x-2">
+                                                {editingProductId === product.id ? (
+                                                    <>
+                                                        <Button
+                                                            onClick={handleUpdateProduct}
+                                                            className="bg-[#8c7851] text-white"
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => {
+                                                                setEditingProductId(null);
+                                                            }}
+                                                            className="bg-gray-500 text-white"
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            onClick={() => {
+                                                                setEditingProductId(product.id);
+                                                                setEditingProductData({ name: product.name, price: product.price, type: product.type });
+                                                            }}
+                                                            className="bg-[#8c7851] text-white"
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => handleDeleteProduct(product.id)}
+                                                            className="bg-red-500 text-white"
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p>No products found.</p>
                         )}
                     </CardBody>
                 </Card>
             </div>
         </Layout>
     );
-}
+};
 
-export default Produk;
+export default ProdukPage;

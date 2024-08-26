@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 import user from '../image/user.png';
-import { Link } from 'react-router-dom'
-import { axiosInstance } from "../lib/axios";
+import {  useNavigate } from 'react-router-dom';
+import { useDispatch } from "react-redux";
 
 const ProfileButton = () => {
 
-    const [users, setUsers] = useState("")
-
-    const getUser = async () => {
-        const response = await axiosInstance.get("")
-    }
+    const navigate = useNavigate();
+    const dispatch = useDispatch(); 
+    const handleLogout = () => {
+        localStorage.removeItem("username");
+        localStorage.removeItem("password");
+        dispatch({ type: "LOGOUT" });
+        navigate("/");
+      };
 
     return (
         <Dropdown>
@@ -24,15 +27,21 @@ const ProfileButton = () => {
                 </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Static Actions">
-                <DropdownItem key="new">Profile</DropdownItem>
-                <DropdownItem key="delete" className="text-danger" color="danger">
-                    <Link to='/'>
-                    Logout
-                    </Link>
+                <DropdownItem key="new" textValue="Admin">
+                    Admin
+                </DropdownItem>
+                <DropdownItem   
+                textValue="logout"
+                key="logout"
+                className="text-danger"
+                color="danger"
+                onClick={handleLogout}
+                >
+                        Logout
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>
     );
 }
 
-export default ProfileButton
+export default ProfileButton;
