@@ -94,10 +94,11 @@ const TransactionList = () => {
                     <td className="py-2">{transaction.id}</td>
                     <td className="py-2">{transaction.customer.name}</td>
                     <td className="py-2">
-                      <ButtonPrimary className="flex items-center" onClick={() => handleClick(transaction)}>
+                      {/* <ButtonPrimary className="flex items-center" onClick={() => handleClick(transaction)}>
                         <img src={icon} alt="Transaksi" className="w-4 h-4 mr-2" />
                         Lihat Transaksi
-                      </ButtonPrimary>
+                      </ButtonPrimary> */}
+                      <DetailTransactionModal onClick={() => handleClick(transaction)} />
                     </td>
                   </tr>
                 ))}
@@ -105,7 +106,7 @@ const TransactionList = () => {
             </table>
 
             {/* Modal Detail Transaksi */}
-            <Modal
+            {/* <Modal
               open={showModalDetail}
               onClose={() => setShowModalDetail(false)}
               width="600px"
@@ -114,7 +115,8 @@ const TransactionList = () => {
                 selectedCustomer={selectedCustomer}
                 handleClose={() => setShowModalDetail(false)}
               />
-            </Modal>
+            </Modal> */}
+
           </CardBody>
         </Card>
       </div>

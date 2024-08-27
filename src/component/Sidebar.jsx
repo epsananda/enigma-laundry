@@ -32,7 +32,7 @@ const Sidebar = () => {
                     </Link>
 
                   </Button> */}
-                  <ButtonPrimary to="/mainmenu" className="w-40" text={"Transaksi"}>
+                  <ButtonPrimary to="/transaksi" className="w-40" text={"Transaksi"}>
                     <img src={transactionLogo} alt="Transaksi" className="w-4 h-4 mr-2" />
                   </ButtonPrimary>
 
