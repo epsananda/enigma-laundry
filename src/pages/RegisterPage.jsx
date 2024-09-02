@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardBody, Button, Input, Tabs, Tab } from "@nextui-org/react";
+import React, { useState, useEffect } from "react";
+import { Card, CardHeader, CardBody, Input, Tabs, Tab } from "@nextui-org/react";
 import { z } from 'zod';
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,9 +14,6 @@ import ButtonPrimary from "../component/ButtonPrimary";
 const LoginFormSchema = z.object({
   username: z.string().min(4, "Username harus mengandung setidaknya 4 karakter"),
   password: z.string().min(8, "Password harus mengandung setidaknya 8 karakter")
-    // .regex(/[A-Z]/, "Password harus mengandung huruf kapital")
-    // .regex(/[0-9]/, "Password harus mengandung angka")
-    // .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password harus mengandung simbol"),
 });
 
 const SignUpFormSchema = z.object({
@@ -53,23 +50,16 @@ const LoginPage = () => {
   const loginUser = async (data) => {
     try {
       const response = await axiosInstance.post("/auth/login", data);
-      // const result = await axios.post("http://localhost:5173/api/v1/auth/login", {
-      //   username: data.username,
-      //   password: data.password,
-
-      // })
-      // console.log(result)
-      // reset();
       const token = response.data.data.token
 
-      if(response.status === 201){
+      if (response.status === 201) {
         console.log(token)
         toast.success("Login berhasil");
         localStorage.setItem("nilai token", token)
         navigate("/transaksi")
       }
-      
-    
+
+
     } catch (error) {
       console.log('Error:', error);
       toast.error("Login gagal, silakan coba lagi");
@@ -80,18 +70,26 @@ const LoginPage = () => {
     try {
       const userData = { ...data, role: "employee" }
       const response = await axiosInstance.post("/auth/register", userData);
-      // reset();
+
       console.log(response)
-      if(response.status === 201){
-        toast.success("Pendaftaran berhasil");
+      if (response.status === 201) {
+        toast.success("Pendaftaran berhasil, Silahkan Login");
         reset()
+        setIsLogin(true);
+        setSelected("login");
       }
-     
+
     } catch (error) {
       console.log('Error:', error);
       toast.error("Pendaftaran gagal, silakan coba lagi");
     }
   };
+
+  useEffect(() => {
+    toast.info("Akun Demo Role Admin, Username: admin, Password: password", {
+      duration: 10000,
+    });
+  }, []);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
@@ -153,8 +151,11 @@ const LoginPage = () => {
                   />
                 )}
               />
-              {/* <Button className="bg-[#8c7851] text-white" type="submit">Login</Button> */}
-              <ButtonPrimary type="submit" text={"Login"} className="mb-4 w-full"/>
+              <ButtonPrimary
+                type="submit"
+                text={"Login"}
+                className="mb-4 w-full" />
+
             </form>
           ) : (
             <form
@@ -221,8 +222,12 @@ const LoginPage = () => {
                   />
                 )}
               />
-              {/* <Button className="bg-[#8c7851] text-white" type="submit">Sign Up</Button> */}
-              <ButtonPrimary type="submit" text={"Login"} className="mb-4 w-full"/>
+
+              <ButtonPrimary
+                type="submit"
+                text={"Sign Up"}
+                className="mb-4 w-full" />
+
             </form>
           )}
         </CardBody>
@@ -231,4 +236,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage

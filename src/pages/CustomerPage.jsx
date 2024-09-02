@@ -3,6 +3,8 @@ import Layout from "../component/Layout";
 import { Card, CardBody, CardHeader, Button, Input } from "@nextui-org/react";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-toastify";
+import ButtonPrimary from "../component/ButtonPrimary";
+import FooterBar from "../component/FooterNavbar";
 
 const CustomerPage = () => {
     const [customers, setCustomers] = useState([]);
@@ -53,6 +55,7 @@ const CustomerPage = () => {
             if (response.status === 201) {
                 fetchCustomers();
                 setNewCustomer({ name: "", phoneNumber: "", address: "" });
+                toast.success('Konsumen Berhasil di Tambahkan');
             }
         } catch (error) {
             if (error.response && error.response.status === 401) {
@@ -80,7 +83,7 @@ const CustomerPage = () => {
                 phoneNumber: editingCustomerData.phoneNumber,
                 address: editingCustomerData.address,
             };
-            
+
             const response = await axiosInstance.put(
                 `customers/`, customerData, { headers });
 
@@ -93,7 +96,7 @@ const CustomerPage = () => {
                 ));
                 setEditingCustomerId(null);
                 setEditingCustomerData({ name: "", phoneNumber: "", address: "" });
-                toast.success('Customer updated successfully');
+                toast.success('Kostumer Berhasil di Perbarui');
             }
         } catch (error) {
             console.error('Error updating customer:', error.response ? error.response.data : error.message);
@@ -122,7 +125,7 @@ const CustomerPage = () => {
             await axiosInstance.delete(`/customers/${customerId}`, { headers });
 
             setCustomers(prevCustomers => prevCustomers.filter(customer => customer.id !== customerId));
-            toast.success('Customer deleted successfully');
+            toast.success('Konsumen Berhasil di hapus');
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 toast.error('Unauthorized. Please login again.');
@@ -145,7 +148,7 @@ const CustomerPage = () => {
             <div className="p-4">
                 <Card className="bg-[#f9f4ef] mb-4">
                     <CardHeader>
-                        <h3>Tambah Customer Baru</h3>
+                        <h3 className="text-2xl font-bold mb-4">Tambah Konsumen Baru</h3>
                     </CardHeader>
                     <CardBody>
                         <Input
@@ -175,15 +178,17 @@ const CustomerPage = () => {
                             onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
                             className="mb-4"
                         />
-                        <Button onClick={handleAddCustomer} className="mt-4 bg-[#8c7851] text-white">
-                            Tambah Customer
-                        </Button>
+                        <ButtonPrimary 
+                        onClick={handleAddCustomer} 
+                        text={"Tambahkan Konsumen"} 
+                        className={"w-full"} />
+                      
                     </CardBody>
                 </Card>
 
                 <Card className="bg-[#f9f4ef]">
                     <CardHeader>
-                        <h3>Daftar Customer</h3>
+                        <h3>Daftar Konsumen</h3>
                     </CardHeader>
                     <CardBody>
                         {customers.length > 0 ? (
@@ -235,22 +240,24 @@ const CustomerPage = () => {
                                             <td className="py-2 px-4 border-b flex space-x-2">
                                                 {editingCustomerId === customer.id ? (
                                                     <>
-                                                        <Button
+                                                        <ButtonPrimary
                                                             onClick={handleUpdateCustomer}
-                                                            className="bg-[#8c7851] text-white"
-                                                        >
-                                                            Save
-                                                        </Button>
+                                                            text={"Save"} />
                                                         <Button
+
                                                             onClick={() => setEditingCustomerId(null)}
-                                                            className="bg-gray-400 text-white"
+                                                            className="bg-gray-400 text-white mb-4
+                                                                     hover:bg-white hover:text-gray-400
+                                                                        hover:border hover:border-gray-400"
                                                         >
                                                             Cancel
                                                         </Button>
+
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Button
+                                                        <ButtonPrimary
+                                                            text={"Edit"}
                                                             onClick={() => {
                                                                 setEditingCustomerId(customer.id);
                                                                 setEditingCustomerData({
@@ -258,14 +265,13 @@ const CustomerPage = () => {
                                                                     phoneNumber: customer.phoneNumber,
                                                                     address: customer.address
                                                                 });
-                                                            }}
-                                                            className="bg-[#8c7851] text-white"
-                                                        >
-                                                            Edit
-                                                        </Button>
+                                                            }} />
+
                                                         <Button
                                                             onClick={() => handleDeleteCustomer(customer.id)}
-                                                            className="bg-red-600 text-white"
+                                                            className="bg-red-600 text-white mb-4
+                                                                     hover:bg-white hover:text-red-600 
+                                                                        hover:border hover:border-red-600"
                                                         >
                                                             Delete
                                                         </Button>
@@ -277,11 +283,12 @@ const CustomerPage = () => {
                                 </tbody>
                             </table>
                         ) : (
-                            <p>No customers found.</p>
+                            <p>Tidak Ada Konsumen.</p>
                         )}
                     </CardBody>
                 </Card>
             </div>
+            <FooterBar />
         </Layout>
     );
 };

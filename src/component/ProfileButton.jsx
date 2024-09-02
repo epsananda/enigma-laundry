@@ -3,6 +3,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 import user from '../image/user.png';
 import {  useNavigate } from 'react-router-dom';
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const ProfileButton = () => {
 
@@ -13,6 +14,7 @@ const ProfileButton = () => {
         localStorage.removeItem("password");
         dispatch({ type: "LOGOUT" });
         navigate("/");
+        toast.success('Logout');
       };
 
     return (
@@ -27,9 +29,7 @@ const ProfileButton = () => {
                 </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Static Actions">
-                <DropdownItem key="new" textValue="Admin">
-                    Admin
-                </DropdownItem>
+               
                 <DropdownItem   
                 textValue="logout"
                 key="logout"

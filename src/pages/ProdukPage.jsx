@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, Input } from '@nextui-org/react';
 import { axiosInstance } from '../lib/axios';
-import toast from 'react-hot-toast';
+import { toast } from "react-toastify";
 import Layout from '../component/Layout';
-import axios from 'axios';
+import ButtonPrimary from '../component/ButtonPrimary';
+import FooterBar from '../component/FooterNavbar';
 
 const ProdukPage = () => {
     const [products, setProducts] = useState([]);
@@ -53,7 +54,7 @@ const ProdukPage = () => {
             const response = await axiosInstance.post('/products', productData, { headers });
 
             if (response.status === 201) {
-                toast.success('Product created successfully');
+                toast.success('Produk Berhasil di Tambahkan');
                 setNewProduct({ name: '', price: '', type: '' });
                 fetchListOfProduct();
             } else {
@@ -65,6 +66,7 @@ const ProdukPage = () => {
         }
     };
 
+    
     const handleUpdateProduct = async () => {
         try {
             const token = localStorage.getItem('nilai token');
@@ -81,7 +83,6 @@ const ProdukPage = () => {
             };
 
             const response = await axiosInstance.put(`products/`, productData, { headers });
-            // const response = await axios.post("http://localhost:5173/api/v1/products", productData, { headers })
 
             if (response.status === 200) {
                 setProducts(prevProducts => prevProducts.map(product =>
@@ -89,7 +90,7 @@ const ProdukPage = () => {
                 ));
                 setEditingProductId(null);
                 setEditingProductData({ name: '', price: '', type: '' });
-                toast.success('Product updated successfully');
+                toast.success('Produk Berhasil di Update');
             } else {
                 toast.error('Failed to update product');
             }
@@ -109,7 +110,7 @@ const ProdukPage = () => {
             await axiosInstance.delete(`products/${productId}`, { headers });
 
             setProducts(prevProduct => prevProduct.filter(product => product.id !== productId));
-            toast.success('Product deleted successfully');
+            toast.success('Produk berhasil di hapus');
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 toast.error('Unauthorized. Please login again.');
@@ -162,9 +163,10 @@ const ProdukPage = () => {
                             onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
                             className="mb-4"
                         />
-                        <Button onClick={handleCreateProduct} className="mt-4 bg-[#8c7851] text-white">
-                            Tambah Produk
-                        </Button>
+                        <ButtonPrimary
+                            onClick={handleCreateProduct}
+                            text={"Tambahkan Produk"} />
+
                     </CardBody>
                 </Card>
 
@@ -224,35 +226,35 @@ const ProdukPage = () => {
                                             <td className="py-2 px-4 border-b flex space-x-2">
                                                 {editingProductId === product.id ? (
                                                     <>
-                                                        <Button
+                                                        <ButtonPrimary
                                                             onClick={handleUpdateProduct}
-                                                            className="bg-[#8c7851] text-white"
-                                                        >
-                                                            Save
-                                                        </Button>
+                                                            text={"Save"} />
+
                                                         <Button
                                                             onClick={() => {
                                                                 setEditingProductId(null);
                                                             }}
-                                                            className="bg-gray-500 text-white"
+                                                            className="bg-gray-400 text-white mb-4
+                                                                     hover:bg-white hover:text-gray-400
+                                                                        hover:border hover:border-gray-400"
                                                         >
                                                             Cancel
                                                         </Button>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Button
+                                                        <ButtonPrimary
+                                                            text={"Edit"}
                                                             onClick={() => {
                                                                 setEditingProductId(product.id);
                                                                 setEditingProductData({ name: product.name, price: product.price, type: product.type });
-                                                            }}
-                                                            className="bg-[#8c7851] text-white"
-                                                        >
-                                                            Edit
-                                                        </Button>
+                                                            }} />
+
                                                         <Button
                                                             onClick={() => handleDeleteProduct(product.id)}
-                                                            className="bg-red-500 text-white"
+                                                            className="bg-red-600 text-white mb-4
+                                                                     hover:bg-white hover:text-red-600 
+                                                                        hover:border hover:border-red-600"
                                                         >
                                                             Delete
                                                         </Button>
@@ -264,11 +266,12 @@ const ProdukPage = () => {
                                 </tbody>
                             </table>
                         ) : (
-                            <p>No products found.</p>
+                            <p>Tidak Ada Produk.</p>
                         )}
                     </CardBody>
                 </Card>
             </div>
+            <FooterBar />
         </Layout>
     );
 };

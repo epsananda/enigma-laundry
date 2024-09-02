@@ -5,8 +5,8 @@ import "react-toastify/ReactToastify.css"
 const App = () => {
   return (
     <>
-      <ToastContainer />
-      <AppRoutes />
+        <ToastContainer />
+        <AppRoutes />
     </>
   );
 };

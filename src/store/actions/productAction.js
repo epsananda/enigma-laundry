@@ -1,6 +1,6 @@
 import { axiosInstance } from "../../lib/axios";
 
-export const getCustomer = () => async (dispatch) => {
+export const getProduct = () => async (dispatch) => {
   try {
     const token = localStorage.getItem("nilai token");
     if (!token) {
@@ -9,9 +9,9 @@ export const getCustomer = () => async (dispatch) => {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const response = await axiosInstance.get("/customers", {headers});
+    const response = await axiosInstance.get("/products", { headers });
     dispatch({
-      type: "GET_CUSTOMER",
+      type: "GET_PRODUCT",
       payload: response.data.data,
     });
   } catch (error) {
@@ -19,7 +19,7 @@ export const getCustomer = () => async (dispatch) => {
   }
 };
 
-export const putCustomer = (updatedCustomer) => async (dispatch) => {
+export const putProduct = (updatedProduct) => async (dispatch) => {
   try {
     const token = localStorage.getItem("nilai token");
     if (!token) {
@@ -28,9 +28,13 @@ export const putCustomer = (updatedCustomer) => async (dispatch) => {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const response = await axiosInstance.put("/customers", {headers}, updatedCustomer);
+    const response = await axiosInstance.put(
+      "/products",
+      { headers },
+      updatedProduct
+    );
     dispatch({
-      type: "PUT_CUSTOMER",
+      type: "PUT_PRODUCT",
       payload: response.data.data,
     });
   } catch (error) {
@@ -38,7 +42,7 @@ export const putCustomer = (updatedCustomer) => async (dispatch) => {
   }
 };
 
-export const postCustomer = (newCustomer) => async (dispatch) => {
+export const postProduct = (newProduct) => async (dispatch) => {
   try {
     const token = localStorage.getItem("nilai token");
     if (!token) {
@@ -47,18 +51,22 @@ export const postCustomer = (newCustomer) => async (dispatch) => {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const response = await axiosInstance.post("/customers", {headers}, newCustomer);
+    const response = await axiosInstance.post(
+      "/products",
+      { headers },
+      newProduct
+    );
     dispatch({
-      type: "POST_CUSTOMER",
+      type: "POST_PRODUCT",
       payload: response.data.data,
     });
-    dispatch(getCustomer());
+    dispatch(getProduct());
   } catch (error) {
     console.log("ERROR POSTING DATA", error);
   }
 };
 
-export const delCustomer = (id) => async (dispatch) => {
+export const delProduct = (id) => async (dispatch) => {
   try {
     const token = localStorage.getItem("nilai token");
     if (!token) {
@@ -67,13 +75,12 @@ export const delCustomer = (id) => async (dispatch) => {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const response = await axiosInstance.delete(`/customers/${id}`, {headers});
-    getCustomer();
+    const response = await axiosInstance.delete(`/products/${id}`, { headers });
     dispatch({
-      type: "DEL_CUSTOMER",
+      type: "DEL_PRODUCT",
       payload: id,
     });
-    dispatch(getCustomer());
+    dispatch(getProduct());
   } catch (error) {
     console.log("ERROR DELETING DATA", error);
   }
